@@ -1,0 +1,17 @@
+{
+  "name": "autologin_test",
+  "version": "1.0.0",
+  "description": "自動運転のサンプルコード",
+  "main": "autologin.js",
+  "dependencies": {
+    "chromium": "^3.0.2",
+    "dotenv": "^8.2.0",
+    "puppeteer": "^5.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kentarou Mamiya <kmamiya@logicalrabbit.jp>",
+  "license": "MIT"
+}
