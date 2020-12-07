@@ -11,36 +11,52 @@ const passwdValue = process.env.PASSWD;
 // 自動ログインテスト
 // TODO: Language を設定しないとログイン操作後が英語になっているかも
 (async () => {
-  // --no-sandbox ... Docker環境のみ必要? root権限関連
-  // ここで指定するtimeoutは page.waitFor() に効果無し？
-  const browser = await Puppeteer.launch({args: ['--no-sandbox'], timeout: 0 });
+  const browser = await Puppeteer.launch({
+    // --no-sandbox ... Docker環境のみ必要? root権限関連
+    args: ['--no-sandbox'],
+    // デバッグ時コメント外す。実際にchromeを表示し、挙動確認する
+    // headless: false
+  });
   const page = await browser.newPage();
-  // timeout ... 楽天の場合30以上かかることが多い。 0 でタイムアウト無し。
-  page.setDefaultNavigationTimeout(0);
 
-  // ログインページへアクセス
+  // ログインページへアクセスし、ログイン操作実行
   await page.goto(loginUrl);
   // IDとパスワード入力
   await page.type('#loginForm input#loginInner_u', idValue);
   await page.type('#loginForm input#loginInner_p', passwdValue);
   // ログインボタンをクリック
   await page.click('#loginForm input[type="submit"].loginButton');
+
   // リロード待ち
   console.log('[' + Date.now() + '] reloading...');
-  await page.waitForNavigation();
-  console.log('[' + Date.now() + '] done.');
+  // waitForNavigation() では永久に待ってしまうときがある(ページ上でJavaScriptが実行されているため？)
+  // クリックしたいものが届くまで待つ
+  const nextTarget = 'a[href="https://my.rakuten.co.jp/?l-id=top_normal_myrakuten_account"]';
+  await page.waitForSelector(nextTarget);
+  console.log('[' + Date.now() + '] done');
 
   // ログイン後ページで「会員情報」クリック
-  await page.click('a[href="https://my.rakuten.co.jp/?l-id=top_normal_myrakuten_account"]');
+  await page.click(nextTarget);
+
   // リロード待ち
   console.log('[' + Date.now() + '] reloading...');
-  await page.waitForNavigation({waitUntil: 'load'});
-  console.log('[' + Date.now() + '] done.');
+  // waitForNavigation() では永久に待ってしまうときがある(ページ上でJavaScriptが実行されているため？)
+  // ページのフッタ部分要素が届けば概ね良しとする
+  await page.waitForSelector('#grpRakutenLinkArea');
+  console.log('[' + Date.now() + '] done');
 
-  // 取り敢えず結果をSTDOUTに出力
-  // ログイン成功していればログイン後画面(JSで動的表示等の場合はJSのみ出てくるかも)
-  // ログイン失敗していればログイン画面+エラーメッセージ
-  console.log(await page.content());
+  // 結果をSTDOUTに出力
+  // TODO: このあたりもう少しうまくやりたい
+  await page.$('#mystatus_name')
+    .then(async element => {
+      console.log('名前 : ');
+      await element.getProperty('textContent').then(result => { console.log(result.toString()); });
+    });
+  await page.$('#mystatus_rankName')
+    .then(async element => {
+      console.log('ランク : ');
+      await element.getProperty('textContent').then(result => { console.log(result.toString()); });
+    });
 
   // 終了
   await browser.close();
