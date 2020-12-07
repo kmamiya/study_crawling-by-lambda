@@ -6,6 +6,8 @@ AWS Lambdaを使用したWebサイトクローリング(ログイン操作あり
 
 # Setup
 
+## nodejsで直接実行(非headless環境でデバッグしたい場合はこちら)
+
 ```
 $ npm install
 
@@ -13,6 +15,18 @@ $ echo "USER_ID='<楽天市場 ID>'" >> .env
 $ echo "PASSWD='<楽天市場 パスワード>'" >> .env
 
 $ node autologin.js
+```
+
+## Docker環境で実行
+
+```
+$ docker build  --tag autologin_test -f Dockerfile .
+$ docker run -ti --volume=${PWD}:/mnt/app autologin_test npm install
+
+$ echo "USER_ID='<楽天市場 ID>'" >> .env
+$ echo "PASSWD='<楽天市場 パスワード>'" >> .env
+
+$ docker run -ti --volume=${PWD}:/mnt/app autologin_test node autologin.js
 ```
 
 # TODO
