@@ -4,7 +4,6 @@
   "description": "自動運転のサンプルコード",
   "main": "autologin.js",
   "dependencies": {
-    "chromium": "^3.0.2",
     "dotenv": "^8.2.0",
     "puppeteer": "^5.5.0"
   },
